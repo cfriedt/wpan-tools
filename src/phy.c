@@ -346,6 +346,11 @@ static int print_beacon_notify_indication(struct nl_msg *msg, void *arg)
 	struct nlattr *tb_msg[NL802154_ATTR_MAX + 1];
 	unsigned int *wpan_phy = arg;
 	int r;
+	int i;
+	int sdu_len;
+	size_t len;
+	const int BEACON_SDU_LEN_MAX = 127;   // FIXME magic number
+	uint8_t sdu[BEACON_SDU_LEN_MAX];
 
 	gnlh = nlmsg_data( nlmsg_hdr( msg ) );
 	if ( NULL ==  gnlh ) {
@@ -360,7 +365,7 @@ static int print_beacon_notify_indication(struct nl_msg *msg, void *arg)
 	    goto protocol_error;
 	}
 
-    printf("beacon_indication:\n");
+	printf("beacon_indication:\n");
 
 	if (tb_msg[NL802154_ATTR_BEACON_SEQUENCE_NUMBER]) {
 		printf("BSN: %x\n", nla_get_u32(tb_msg[NL802154_ATTR_BEACON_SEQUENCE_NUMBER]));
@@ -440,6 +445,33 @@ static int print_beacon_notify_indication(struct nl_msg *msg, void *arg)
 		    printf("\tKey Index    : %d\n", nla_get_u8(tb_pan_desc[NL802154_PAN_DESC_ATTR_KEY_INDEX]));
 		}
 	}
+
+	if (tb_msg[NL802154_ATTR_PEND_ADDR_SPEC]) {
+		printf("Pend addr spec: %x\n", nla_get_u8(tb_msg[NL802154_ATTR_PEND_ADDR_SPEC]));
+	}
+
+	if (tb_msg[NL802154_ATTR_SDU_LENGTH]) {
+		sdu_len = nla_get_u8(tb_msg[NL802154_ATTR_SDU_LENGTH]);
+		if( sdu_len > BEACON_SDU_LEN_MAX ) {
+			sdu_len = BEACON_SDU_LEN_MAX;
+		}
+		len = sdu_len;
+		printf("SDU Len: %d\n", sdu_len);
+	}
+	else {
+		len = 0;
+	}
+
+	r = parse_nla_array_u8( tb_msg[ NL802154_ATTR_SDU ], NL802154_ATTR_SDU_ENTRY, sdu, &len );
+	if ( 0 != r ) {
+	    goto protocol_error;
+	}
+
+	printf("SDU: ", sdu_len);
+	for (i = 0; i < sdu_len; i++) {
+	    printf("%x ", sdu[i]);
+	}
+	printf("\n", sdu[i]);
 
 	goto out;
 
