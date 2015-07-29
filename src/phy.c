@@ -408,6 +408,37 @@ static int print_beacon_notify_indication(struct nl_msg *msg, void *arg)
 		if (tb_pan_desc[NL802154_PAN_DESC_ATTR_CHANNEL_NUM]) {
 		    printf("\tChannel Num  : %d\n", nla_get_u8(tb_pan_desc[NL802154_PAN_DESC_ATTR_CHANNEL_NUM]));
 		}
+		if (tb_pan_desc[NL802154_PAN_DESC_ATTR_CHANNEL_PAGE]) {
+		    printf("\tChannel Page : %d\n", nla_get_u8(tb_pan_desc[NL802154_PAN_DESC_ATTR_CHANNEL_PAGE]));
+		}
+		if (tb_pan_desc[NL802154_PAN_DESC_ATTR_SUPERFRAME_SPEC]) {
+		    printf("\tSF spec      : %x\n", nla_get_u8(tb_pan_desc[NL802154_PAN_DESC_ATTR_SUPERFRAME_SPEC]));
+		}
+		if (tb_pan_desc[NL802154_PAN_DESC_ATTR_GTS_PERMIT]) {
+			char *gts = nla_get_u32(tb_pan_desc[NL802154_PAN_DESC_ATTR_GTS_PERMIT]) ? "TRUE" : "FALSE";
+		    printf("\tGTS permit   : %s\n", gts);
+		}
+		if (tb_pan_desc[NL802154_PAN_DESC_ATTR_LQI]) {
+		    printf("\tLQI          : %x\n", nla_get_u8(tb_pan_desc[NL802154_PAN_DESC_ATTR_LQI]));
+		}
+		if (tb_pan_desc[NL802154_PAN_DESC_ATTR_TIME_STAMP]) {
+		    printf("\tTimestamp    : %x\n", nla_get_u32(tb_pan_desc[NL802154_PAN_DESC_ATTR_TIME_STAMP]));
+		}
+		if (tb_pan_desc[NL802154_PAN_DESC_ATTR_SEC_STATUS]) {
+		    printf("\tSec status   : %x\n", nla_get_u8(tb_pan_desc[NL802154_PAN_DESC_ATTR_SEC_STATUS]));
+		}
+		if (tb_pan_desc[NL802154_PAN_DESC_ATTR_SEC_LEVEL]) {
+		    printf("\tSec level    : %x\n", nla_get_u8(tb_pan_desc[NL802154_PAN_DESC_ATTR_SEC_LEVEL]));
+		}
+		if (tb_pan_desc[NL802154_PAN_DESC_ATTR_KEY_ID_MODE]) {
+		    printf("\tKey Id Mode  : %x\n", nla_get_u8(tb_pan_desc[NL802154_PAN_DESC_ATTR_KEY_ID_MODE]));
+		}
+		if (tb_pan_desc[NL802154_PAN_DESC_ATTR_KEY_SRC]) {
+		    printf("\tKey Src      : %x\n", nla_get_u8(tb_pan_desc[NL802154_PAN_DESC_ATTR_KEY_SRC]));
+		}
+		if (tb_pan_desc[NL802154_PAN_DESC_ATTR_KEY_INDEX]) {
+		    printf("\tKey Index    : %d\n", nla_get_u8(tb_pan_desc[NL802154_PAN_DESC_ATTR_KEY_INDEX]));
+		}
 	}
 
 	goto out;
