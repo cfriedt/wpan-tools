@@ -360,19 +360,63 @@ static int print_beacon_notify_indication(struct nl_msg *msg, void *arg)
 	    goto protocol_error;
 	}
 
-        printf("beacon_indication:\n");
+    printf("beacon_indication:\n");
+
 	if (tb_msg[NL802154_ATTR_BEACON_SEQUENCE_NUMBER]) {
-		printf("\tBSN: %x\n", nla_get_u32(tb_msg[NL802154_ATTR_BEACON_SEQUENCE_NUMBER]));
-		printf("\tLQI: %x\n", nla_get_u32(tb_msg[NL802154_ATTR_BEACON_LQI]));
+		printf("BSN: %x\n", nla_get_u32(tb_msg[NL802154_ATTR_BEACON_SEQUENCE_NUMBER]));
+	}
+
+	if (tb_msg[NL802154_ATTR_PAN_DESCRIPTOR]) {
+		struct nlattr *tb_pan_desc[NL802154_PAN_DESC_ATTR_MAX + 1];
+
+		static struct nla_policy pan_desc_policy[NL802154_PAN_DESC_ATTR_MAX + 1] = {
+			[NL802154_PAN_DESC_ATTR_SRC_ADDR_MODE] = { .type = NLA_U8 },
+			[NL802154_PAN_DESC_ATTR_SRC_PAN_ID] = { .type = NLA_U16 },
+			[NL802154_PAN_DESC_ATTR_SRC_ADDR] = { .type = NLA_U32 },
+			[NL802154_PAN_DESC_ATTR_CHANNEL_NUM] = { .type = NLA_U8 },
+			[NL802154_PAN_DESC_ATTR_CHANNEL_PAGE] = { .type = NLA_U8 },
+			[NL802154_PAN_DESC_ATTR_SUPERFRAME_SPEC] = { .type = NLA_U8 },
+			[NL802154_PAN_DESC_ATTR_GTS_PERMIT] = { .type = NLA_U32 },
+			[NL802154_PAN_DESC_ATTR_LQI] = { .type = NLA_U8 },
+			[NL802154_PAN_DESC_ATTR_TIME_STAMP] = { .type = NLA_U32 },
+			[NL802154_PAN_DESC_ATTR_SEC_STATUS] = { .type = NLA_U8 },
+			[NL802154_PAN_DESC_ATTR_SEC_LEVEL] = { .type = NLA_U8 },
+			[NL802154_PAN_DESC_ATTR_KEY_ID_MODE] = { .type = NLA_U8 },
+			[NL802154_PAN_DESC_ATTR_KEY_SRC] = { .type = NLA_U8 },
+			[NL802154_PAN_DESC_ATTR_KEY_INDEX] = { .type = NLA_U8 },
+		};
+
+		printf("PAN descriptor:\n");
+
+		r = nla_parse_nested(tb_pan_desc, NL802154_PAN_DESC_ATTR_MAX,
+				       tb_msg[NL802154_ATTR_PAN_DESCRIPTOR],
+				       pan_desc_policy);
+		if ( 0 != r ) {
+		    fprintf( stderr, "nla_parse_nested\n" );
+		    goto protocol_error;
+		}
+
+		if (tb_pan_desc[NL802154_PAN_DESC_ATTR_SRC_ADDR_MODE]) {
+		    printf("\tSrc Addr Mode: %d\n", nla_get_u8(tb_pan_desc[NL802154_PAN_DESC_ATTR_SRC_ADDR_MODE]));
+		}
+		if (tb_pan_desc[NL802154_PAN_DESC_ATTR_SRC_PAN_ID]) {
+		    printf("\tSrc PAN Id   : %d\n", nla_get_u16(tb_pan_desc[NL802154_PAN_DESC_ATTR_SRC_PAN_ID]));
+		}
+		if (tb_pan_desc[NL802154_PAN_DESC_ATTR_SRC_ADDR]) {
+		    printf("\tSrc Addr     : %d\n", nla_get_u32(tb_pan_desc[NL802154_PAN_DESC_ATTR_SRC_ADDR]));
+		}
+		if (tb_pan_desc[NL802154_PAN_DESC_ATTR_CHANNEL_NUM]) {
+		    printf("\tChannel Num  : %d\n", nla_get_u8(tb_pan_desc[NL802154_PAN_DESC_ATTR_CHANNEL_NUM]));
+		}
 	}
 
 	goto out;
 
 protocol_error:
-    fprintf( stderr, "protocol error\n" );
-    r = -EINVAL;
+	fprintf( stderr, "protocol error\n" );
+	r = -EINVAL;
 out:
-    return NL_SKIP;
+	return NL_SKIP;
 }
 
 static int handle_beacon_notify(struct nl802154_state *state,
