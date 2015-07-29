@@ -362,7 +362,8 @@ static int print_beacon_notify_indication(struct nl_msg *msg, void *arg)
 
         printf("beacon_indication:\n");
 	if (tb_msg[NL802154_ATTR_BEACON_SEQUENCE_NUMBER]) {
-		printf("\tBSN: %d\n", nla_get_u32(tb_msg[NL802154_ATTR_BEACON_SEQUENCE_NUMBER]));
+		printf("\tBSN: %x\n", nla_get_u32(tb_msg[NL802154_ATTR_BEACON_SEQUENCE_NUMBER]));
+		printf("\tLQI: %x\n", nla_get_u32(tb_msg[NL802154_ATTR_BEACON_LQI]));
 	}
 
 	goto out;
@@ -380,6 +381,7 @@ static int handle_beacon_notify(struct nl802154_state *state,
 				 int argc, char **argv,
 				 enum id_input id)
 {
+        printf("Inside %s\n", __FUNCTION__);
 	nl_cb_set(cb, NL_CB_VALID, NL_CB_CUSTOM, print_beacon_notify_indication, NULL);
 	return 0;
 }

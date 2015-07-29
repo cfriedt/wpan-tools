@@ -441,7 +441,8 @@ static int __handle_cmd(struct nl802154_state *state, enum id_input idby,
 	nl_cb_set(cb, NL_CB_FINISH, NL_CB_CUSTOM, finish_handler, &err);
 	nl_cb_set(cb, NL_CB_ACK, NL_CB_CUSTOM, ack_handler, &err);
 
-	while (err > 0)
+	//while (err > 0)
+	while (1)
 		nl_recvmsgs(state->nl_sock, cb);
 out:
 	nl_cb_put(cb);
