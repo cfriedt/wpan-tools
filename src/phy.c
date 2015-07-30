@@ -488,10 +488,14 @@ static int handle_beacon_notify(struct nl802154_state *state,
 				 int argc, char **argv,
 				 enum id_input id)
 {
-        printf("Inside %s\n", __FUNCTION__);
+    printf("Inside %s %d\n", __FUNCTION__,  atoi(argv[0]) );
+	NLA_PUT_U32(msg, NL802154_ATTR_BEACON_NOTIFICATION_TIMEOUT, atoi(argv[0]));
 	nl_cb_set(cb, NL_CB_VALID, NL_CB_CUSTOM, print_beacon_notify_indication, NULL);
-	return 0;
-}
 
-COMMAND(set, beacon_notify, "<none>",
+	return 0;
+
+nla_put_failure:
+    return -ENOBUFS;
+}
+COMMAND(set, beacon_notify, "<ms>",
     NL802154_CMD_SET_BEACON_NOTIFY, 0, CIB_PHY, handle_beacon_notify, NULL);
