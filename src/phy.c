@@ -375,20 +375,20 @@ static int print_beacon_notify_indication(struct nl_msg *msg, void *arg)
 		struct nlattr *tb_pan_desc[NL802154_ATTR_MAX + 1];
 
 		static struct nla_policy pan_desc_policy[NL802154_ATTR_MAX + 1] = {
-			[NL802154_PAN_DESC_ATTR_SRC_ADDR_MODE] = { .type = NLA_U8 },
-			[NL802154_PAN_DESC_ATTR_SRC_PAN_ID] = { .type = NLA_U16 },
-			[NL802154_PAN_DESC_ATTR_SRC_ADDR] = { .type = NLA_U32 },
-			[NL802154_PAN_DESC_ATTR_CHANNEL_NUM] = { .type = NLA_U8 },
-			[NL802154_PAN_DESC_ATTR_CHANNEL_PAGE] = { .type = NLA_U8 },
-			[NL802154_PAN_DESC_ATTR_SUPERFRAME_SPEC] = { .type = NLA_U8 },
-			[NL802154_PAN_DESC_ATTR_GTS_PERMIT] = { .type = NLA_U32 },
-			[NL802154_PAN_DESC_ATTR_LQI] = { .type = NLA_U8 },
-			[NL802154_PAN_DESC_ATTR_TIME_STAMP] = { .type = NLA_U32 },
-			[NL802154_PAN_DESC_ATTR_SEC_STATUS] = { .type = NLA_U8 },
-			[NL802154_PAN_DESC_ATTR_SEC_LEVEL] = { .type = NLA_U8 },
-			[NL802154_PAN_DESC_ATTR_KEY_ID_MODE] = { .type = NLA_U8 },
-			[NL802154_PAN_DESC_ATTR_KEY_SRC] = { .type = NLA_U8 },
-			[NL802154_PAN_DESC_ATTR_KEY_INDEX] = { .type = NLA_U8 },
+			[NL802154_ATTR_PAN_DESC_SRC_ADDR_MODE] = { .type = NLA_U8 },
+			[NL802154_ATTR_PAN_DESC_SRC_PAN_ID] = { .type = NLA_U16 },
+			[NL802154_ATTR_PAN_DESC_SRC_ADDR] = { .type = NLA_U32 },
+			[NL802154_ATTR_PAN_DESC_CHANNEL_NUM] = { .type = NLA_U8 },
+			[NL802154_ATTR_PAN_DESC_CHANNEL_PAGE] = { .type = NLA_U8 },
+			[NL802154_ATTR_PAN_DESC_SUPERFRAME_SPEC] = { .type = NLA_U8 },
+			[NL802154_ATTR_PAN_DESC_GTS_PERMIT] = { .type = NLA_U32 },
+			[NL802154_ATTR_PAN_DESC_LQI] = { .type = NLA_U8 },
+			[NL802154_ATTR_PAN_DESC_TIME_STAMP] = { .type = NLA_U32 },
+			[NL802154_ATTR_PAN_DESC_SEC_STATUS] = { .type = NLA_U8 },
+			[NL802154_ATTR_PAN_DESC_SEC_LEVEL] = { .type = NLA_U8 },
+			[NL802154_ATTR_PAN_DESC_KEY_ID_MODE] = { .type = NLA_U8 },
+			[NL802154_ATTR_PAN_DESC_KEY_SRC] = { .type = NLA_U8 },
+			[NL802154_ATTR_PAN_DESC_KEY_INDEX] = { .type = NLA_U8 },
 		};
 
 		printf("PAN descriptor:\n");
@@ -401,48 +401,48 @@ static int print_beacon_notify_indication(struct nl_msg *msg, void *arg)
 		    goto protocol_error;
 		}
 
-		if (tb_pan_desc[NL802154_PAN_DESC_ATTR_SRC_ADDR_MODE]) {
-		    printf("\tSrc Addr Mode: %d\n", nla_get_u8(tb_pan_desc[NL802154_PAN_DESC_ATTR_SRC_ADDR_MODE]));
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_SRC_ADDR_MODE]) {
+		    printf("\tSrc Addr Mode: %d\n", nla_get_u8(tb_pan_desc[NL802154_ATTR_PAN_DESC_SRC_ADDR_MODE]));
 		}
-		if (tb_pan_desc[NL802154_PAN_DESC_ATTR_SRC_PAN_ID]) {
-		    printf("\tSrc PAN Id   : %d\n", nla_get_u16(tb_pan_desc[NL802154_PAN_DESC_ATTR_SRC_PAN_ID]));
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_SRC_PAN_ID]) {
+		    printf("\tSrc PAN Id   : %d\n", nla_get_u16(tb_pan_desc[NL802154_ATTR_PAN_DESC_SRC_PAN_ID]));
 		}
-		if (tb_pan_desc[NL802154_PAN_DESC_ATTR_SRC_ADDR]) {
-		    printf("\tSrc Addr     : %d\n", nla_get_u32(tb_pan_desc[NL802154_PAN_DESC_ATTR_SRC_ADDR]));
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_SRC_ADDR]) {
+		    printf("\tSrc Addr     : %d\n", nla_get_u32(tb_pan_desc[NL802154_ATTR_PAN_DESC_SRC_ADDR]));
 		}
-		if (tb_pan_desc[NL802154_PAN_DESC_ATTR_CHANNEL_NUM]) {
-		    printf("\tChannel Num  : %d\n", nla_get_u8(tb_pan_desc[NL802154_PAN_DESC_ATTR_CHANNEL_NUM]));
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_CHANNEL_NUM]) {
+		    printf("\tChannel Num  : %d\n", nla_get_u8(tb_pan_desc[NL802154_ATTR_PAN_DESC_CHANNEL_NUM]));
 		}
-		if (tb_pan_desc[NL802154_PAN_DESC_ATTR_CHANNEL_PAGE]) {
-		    printf("\tChannel Page : %d\n", nla_get_u8(tb_pan_desc[NL802154_PAN_DESC_ATTR_CHANNEL_PAGE]));
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_CHANNEL_PAGE]) {
+		    printf("\tChannel Page : %d\n", nla_get_u8(tb_pan_desc[NL802154_ATTR_PAN_DESC_CHANNEL_PAGE]));
 		}
-		if (tb_pan_desc[NL802154_PAN_DESC_ATTR_SUPERFRAME_SPEC]) {
-		    printf("\tSF spec      : %x\n", nla_get_u8(tb_pan_desc[NL802154_PAN_DESC_ATTR_SUPERFRAME_SPEC]));
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_SUPERFRAME_SPEC]) {
+		    printf("\tSF spec      : %x\n", nla_get_u8(tb_pan_desc[NL802154_ATTR_PAN_DESC_SUPERFRAME_SPEC]));
 		}
-		if (tb_pan_desc[NL802154_PAN_DESC_ATTR_GTS_PERMIT]) {
-			char *gts = nla_get_u32(tb_pan_desc[NL802154_PAN_DESC_ATTR_GTS_PERMIT]) ? "TRUE" : "FALSE";
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_GTS_PERMIT]) {
+			char *gts = nla_get_u32(tb_pan_desc[NL802154_ATTR_PAN_DESC_GTS_PERMIT]) ? "TRUE" : "FALSE";
 		    printf("\tGTS permit   : %s\n", gts);
 		}
-		if (tb_pan_desc[NL802154_PAN_DESC_ATTR_LQI]) {
-		    printf("\tLQI          : %x\n", nla_get_u8(tb_pan_desc[NL802154_PAN_DESC_ATTR_LQI]));
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_LQI]) {
+		    printf("\tLQI          : %x\n", nla_get_u8(tb_pan_desc[NL802154_ATTR_PAN_DESC_LQI]));
 		}
-		if (tb_pan_desc[NL802154_PAN_DESC_ATTR_TIME_STAMP]) {
-		    printf("\tTimestamp    : %x\n", nla_get_u32(tb_pan_desc[NL802154_PAN_DESC_ATTR_TIME_STAMP]));
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_TIME_STAMP]) {
+		    printf("\tTimestamp    : %x\n", nla_get_u32(tb_pan_desc[NL802154_ATTR_PAN_DESC_TIME_STAMP]));
 		}
-		if (tb_pan_desc[NL802154_PAN_DESC_ATTR_SEC_STATUS]) {
-		    printf("\tSec status   : %x\n", nla_get_u8(tb_pan_desc[NL802154_PAN_DESC_ATTR_SEC_STATUS]));
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_SEC_STATUS]) {
+		    printf("\tSec status   : %x\n", nla_get_u8(tb_pan_desc[NL802154_ATTR_PAN_DESC_SEC_STATUS]));
 		}
-		if (tb_pan_desc[NL802154_PAN_DESC_ATTR_SEC_LEVEL]) {
-		    printf("\tSec level    : %x\n", nla_get_u8(tb_pan_desc[NL802154_PAN_DESC_ATTR_SEC_LEVEL]));
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_SEC_LEVEL]) {
+		    printf("\tSec level    : %x\n", nla_get_u8(tb_pan_desc[NL802154_ATTR_PAN_DESC_SEC_LEVEL]));
 		}
-		if (tb_pan_desc[NL802154_PAN_DESC_ATTR_KEY_ID_MODE]) {
-		    printf("\tKey Id Mode  : %x\n", nla_get_u8(tb_pan_desc[NL802154_PAN_DESC_ATTR_KEY_ID_MODE]));
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_KEY_ID_MODE]) {
+		    printf("\tKey Id Mode  : %x\n", nla_get_u8(tb_pan_desc[NL802154_ATTR_PAN_DESC_KEY_ID_MODE]));
 		}
-		if (tb_pan_desc[NL802154_PAN_DESC_ATTR_KEY_SRC]) {
-		    printf("\tKey Src      : %x\n", nla_get_u8(tb_pan_desc[NL802154_PAN_DESC_ATTR_KEY_SRC]));
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_KEY_SRC]) {
+		    printf("\tKey Src      : %x\n", nla_get_u8(tb_pan_desc[NL802154_ATTR_PAN_DESC_KEY_SRC]));
 		}
-		if (tb_pan_desc[NL802154_PAN_DESC_ATTR_KEY_INDEX]) {
-		    printf("\tKey Index    : %d\n", nla_get_u8(tb_pan_desc[NL802154_PAN_DESC_ATTR_KEY_INDEX]));
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_KEY_INDEX]) {
+		    printf("\tKey Index    : %d\n", nla_get_u8(tb_pan_desc[NL802154_ATTR_PAN_DESC_KEY_INDEX]));
 		}
 	}
 
