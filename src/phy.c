@@ -372,9 +372,9 @@ static int print_beacon_notify_indication(struct nl_msg *msg, void *arg)
 	}
 
 	if (tb_msg[NL802154_ATTR_PAN_DESCRIPTOR]) {
-		struct nlattr *tb_pan_desc[NL802154_PAN_DESC_ATTR_MAX + 1];
+		struct nlattr *tb_pan_desc[NL802154_ATTR_MAX + 1];
 
-		static struct nla_policy pan_desc_policy[NL802154_PAN_DESC_ATTR_MAX + 1] = {
+		static struct nla_policy pan_desc_policy[NL802154_ATTR_MAX + 1] = {
 			[NL802154_PAN_DESC_ATTR_SRC_ADDR_MODE] = { .type = NLA_U8 },
 			[NL802154_PAN_DESC_ATTR_SRC_PAN_ID] = { .type = NLA_U16 },
 			[NL802154_PAN_DESC_ATTR_SRC_ADDR] = { .type = NLA_U32 },
@@ -393,7 +393,7 @@ static int print_beacon_notify_indication(struct nl_msg *msg, void *arg)
 
 		printf("PAN descriptor:\n");
 
-		r = nla_parse_nested(tb_pan_desc, NL802154_PAN_DESC_ATTR_MAX,
+		r = nla_parse_nested(tb_pan_desc, NL802154_ATTR_MAX,
 				       tb_msg[NL802154_ATTR_PAN_DESCRIPTOR],
 				       pan_desc_policy);
 		if ( 0 != r ) {
@@ -489,7 +489,7 @@ static int handle_beacon_notify(struct nl802154_state *state,
 				 enum id_input id)
 {
     printf("Inside %s %d\n", __FUNCTION__,  atoi(argv[0]) );
-	NLA_PUT_U32(msg, NL802154_ATTR_BEACON_NOTIFICATION_TIMEOUT, atoi(argv[0]));
+	NLA_PUT_U32(msg, NL802154_ATTR_BEACON_INDICATION_TIMEOUT, atoi(argv[0]));
 	nl_cb_set(cb, NL_CB_VALID, NL_CB_CUSTOM, print_beacon_notify_indication, NULL);
 
 	return 0;
@@ -497,5 +497,5 @@ static int handle_beacon_notify(struct nl802154_state *state,
 nla_put_failure:
     return -ENOBUFS;
 }
-COMMAND(set, beacon_notify, "<ms>",
-    NL802154_CMD_SET_BEACON_NOTIFY, 0, CIB_PHY, handle_beacon_notify, NULL);
+COMMAND(get, beacon_notify, "<ms>",
+    NL802154_CMD_GET_BEACON_NOTIFY, 0, CIB_PHY, handle_beacon_notify, NULL);
