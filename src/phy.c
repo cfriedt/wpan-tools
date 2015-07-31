@@ -340,7 +340,7 @@ COMMAND(get, ed_scan, "[<page> [<channels> [<duration>]]]",
     NL802154_CMD_ED_SCAN_REQ, 0, CIB_PHY, handle_ed_scan, NULL);
 
 
-static int print_beacon_notify_indication(struct nl_msg *msg, void *arg)
+static int print_nl802154_beacon_notify_ind(struct nl_msg *msg, void *arg)
 {
 	struct genlmsghdr *gnlh;
 	struct nlattr *tb_msg[NL802154_ATTR_MAX + 1];
@@ -488,14 +488,16 @@ static int handle_beacon_notify(struct nl802154_state *state,
 				 int argc, char **argv,
 				 enum id_input id)
 {
-    printf("Inside %s %d\n", __FUNCTION__,  atoi(argv[0]) );
-	NLA_PUT_U32(msg, NL802154_ATTR_BEACON_INDICATION_TIMEOUT, atoi(argv[0]));
-	nl_cb_set(cb, NL_CB_VALID, NL_CB_CUSTOM, print_beacon_notify_indication, NULL);
+	int r;
 
-	return 0;
+	NLA_PUT_U32(msg, NL802154_ATTR_BEACON_INDICATION_TIMEOUT, atoi(argv[0]));
+	r = nl_cb_set(cb, NL_CB_VALID, NL_CB_CUSTOM, print_nl802154_beacon_notify_ind, NULL);
+    goto out;
 
 nla_put_failure:
-    return -ENOBUFS;
+    r = -ENOBUFS;
+out:
+    return r;
 }
 COMMAND(get, beacon_notify, "<ms>",
     NL802154_CMD_GET_BEACON_NOTIFY, 0, CIB_PHY, handle_beacon_notify, NULL);
