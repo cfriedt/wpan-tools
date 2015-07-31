@@ -489,8 +489,18 @@ static int handle_beacon_notify(struct nl802154_state *state,
 				 enum id_input id)
 {
 	int r;
+	int timeout_ms;
 
-	NLA_PUT_U32(msg, NL802154_ATTR_BEACON_INDICATION_TIMEOUT, atoi(argv[0]));
+	if ( NULL == argv[0]) {
+        r = -EINVAL;
+        goto out;
+	}
+	timeout_ms = atoi(argv[0]);
+	if (timeout_ms < 0) {
+        r = -EINVAL;
+        goto out;
+	}
+	NLA_PUT_U16(msg, NL802154_ATTR_BEACON_INDICATION_TIMEOUT, (uint16_t) timeout_ms);
 	r = nl_cb_set(cb, NL_CB_VALID, NL_CB_CUSTOM, print_nl802154_beacon_notify_ind, NULL);
     goto out;
 
