@@ -408,6 +408,7 @@ static int __handle_cmd(struct nl802154_state *state, enum id_input idby,
 		goto out_free_msg;
 	}
 
+	/* Creates the required netlink and generic netlink headers */
 	genlmsg_put(msg, 0, 0, state->nl802154_id, 0,
 		    cmd->nl_msg_flags, cmd->cmd, 0);
 
@@ -431,6 +432,13 @@ static int __handle_cmd(struct nl802154_state *state, enum id_input idby,
 
 	nl_socket_set_cb(state->nl_sock, s_cb);
 
+	/* Deprecated -- just nl_send_auto() */
+	/* nl_send_auto()
+	 *     -> nl_complete_msg(sk, msg)
+	 *     -> nl_send(sk, msg);
+	 *
+     * This function triggers the `NL_CB_MSG_OUT` callback.
+	 */
 	err = nl_send_auto_complete(state->nl_sock, msg);
 	if (err < 0)
 		goto out;

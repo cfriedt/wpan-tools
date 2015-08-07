@@ -338,3 +338,176 @@ invalid_arg:
 
 COMMAND(get, ed_scan, "[<page> [<channels> [<duration>]]]",
     NL802154_CMD_ED_SCAN_REQ, 0, CIB_PHY, handle_ed_scan, NULL);
+
+
+static int print_nl802154_beacon_notify_ind(struct nl_msg *msg, void *arg)
+{
+	struct genlmsghdr *gnlh;
+	struct nlattr *tb_msg[NL802154_ATTR_MAX + 1];
+	unsigned int *wpan_phy = arg;
+	int r;
+	int i;
+	int sdu_len;
+	size_t len;
+	const int BEACON_SDU_LEN_MAX = 127;   // FIXME magic number
+	uint8_t sdu[BEACON_SDU_LEN_MAX];
+
+	gnlh = nlmsg_data( nlmsg_hdr( msg ) );
+	if ( NULL ==  gnlh ) {
+	    fprintf( stderr, "gnlh was null\n" );
+	    goto protocol_error;
+	}
+
+	r = nla_parse( tb_msg, NL802154_ATTR_MAX, genlmsg_attrdata( gnlh, 0 ),
+	      genlmsg_attrlen( gnlh, 0 ), NULL );
+	if ( 0 != r ) {
+	    fprintf( stderr, "nla_parse\n" );
+	    goto protocol_error;
+	}
+
+	printf("beacon_indication:\n");
+
+	if (tb_msg[NL802154_ATTR_BEACON_SEQUENCE_NUMBER]) {
+		printf("BSN: %x\n", nla_get_u32(tb_msg[NL802154_ATTR_BEACON_SEQUENCE_NUMBER]));
+	}
+
+	if (tb_msg[NL802154_ATTR_PAN_DESCRIPTOR]) {
+		struct nlattr *tb_pan_desc[NL802154_ATTR_MAX + 1];
+
+		static struct nla_policy pan_desc_policy[NL802154_ATTR_MAX + 1] = {
+			[NL802154_ATTR_PAN_DESC_SRC_ADDR_MODE] = { .type = NLA_U8 },
+			[NL802154_ATTR_PAN_DESC_SRC_PAN_ID] = { .type = NLA_U16 },
+			[NL802154_ATTR_PAN_DESC_SRC_ADDR] = { .type = NLA_U32 },
+			[NL802154_ATTR_PAN_DESC_CHANNEL_NUM] = { .type = NLA_U8 },
+			[NL802154_ATTR_PAN_DESC_CHANNEL_PAGE] = { .type = NLA_U8 },
+			[NL802154_ATTR_PAN_DESC_SUPERFRAME_SPEC] = { .type = NLA_U8 },
+			[NL802154_ATTR_PAN_DESC_GTS_PERMIT] = { .type = NLA_U32 },
+			[NL802154_ATTR_PAN_DESC_LQI] = { .type = NLA_U8 },
+			[NL802154_ATTR_PAN_DESC_TIME_STAMP] = { .type = NLA_U32 },
+			[NL802154_ATTR_PAN_DESC_SEC_STATUS] = { .type = NLA_U8 },
+			[NL802154_ATTR_PAN_DESC_SEC_LEVEL] = { .type = NLA_U8 },
+			[NL802154_ATTR_PAN_DESC_KEY_ID_MODE] = { .type = NLA_U8 },
+			[NL802154_ATTR_PAN_DESC_KEY_SRC] = { .type = NLA_U8 },
+			[NL802154_ATTR_PAN_DESC_KEY_INDEX] = { .type = NLA_U8 },
+		};
+
+		printf("PAN descriptor:\n");
+
+		r = nla_parse_nested(tb_pan_desc, NL802154_ATTR_MAX,
+				       tb_msg[NL802154_ATTR_PAN_DESCRIPTOR],
+				       pan_desc_policy);
+		if ( 0 != r ) {
+		    fprintf( stderr, "nla_parse_nested\n" );
+		    goto protocol_error;
+		}
+
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_SRC_ADDR_MODE]) {
+		    printf("\tSrc Addr Mode: %d\n", nla_get_u8(tb_pan_desc[NL802154_ATTR_PAN_DESC_SRC_ADDR_MODE]));
+		}
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_SRC_PAN_ID]) {
+		    printf("\tSrc PAN Id   : %d\n", nla_get_u16(tb_pan_desc[NL802154_ATTR_PAN_DESC_SRC_PAN_ID]));
+		}
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_SRC_ADDR]) {
+		    printf("\tSrc Addr     : %d\n", nla_get_u32(tb_pan_desc[NL802154_ATTR_PAN_DESC_SRC_ADDR]));
+		}
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_CHANNEL_NUM]) {
+		    printf("\tChannel Num  : %d\n", nla_get_u8(tb_pan_desc[NL802154_ATTR_PAN_DESC_CHANNEL_NUM]));
+		}
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_CHANNEL_PAGE]) {
+		    printf("\tChannel Page : %d\n", nla_get_u8(tb_pan_desc[NL802154_ATTR_PAN_DESC_CHANNEL_PAGE]));
+		}
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_SUPERFRAME_SPEC]) {
+		    printf("\tSF spec      : %x\n", nla_get_u8(tb_pan_desc[NL802154_ATTR_PAN_DESC_SUPERFRAME_SPEC]));
+		}
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_GTS_PERMIT]) {
+			char *gts = nla_get_u32(tb_pan_desc[NL802154_ATTR_PAN_DESC_GTS_PERMIT]) ? "TRUE" : "FALSE";
+		    printf("\tGTS permit   : %s\n", gts);
+		}
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_LQI]) {
+		    printf("\tLQI          : %x\n", nla_get_u8(tb_pan_desc[NL802154_ATTR_PAN_DESC_LQI]));
+		}
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_TIME_STAMP]) {
+		    printf("\tTimestamp    : %x\n", nla_get_u32(tb_pan_desc[NL802154_ATTR_PAN_DESC_TIME_STAMP]));
+		}
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_SEC_STATUS]) {
+		    printf("\tSec status   : %x\n", nla_get_u8(tb_pan_desc[NL802154_ATTR_PAN_DESC_SEC_STATUS]));
+		}
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_SEC_LEVEL]) {
+		    printf("\tSec level    : %x\n", nla_get_u8(tb_pan_desc[NL802154_ATTR_PAN_DESC_SEC_LEVEL]));
+		}
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_KEY_ID_MODE]) {
+		    printf("\tKey Id Mode  : %x\n", nla_get_u8(tb_pan_desc[NL802154_ATTR_PAN_DESC_KEY_ID_MODE]));
+		}
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_KEY_SRC]) {
+		    printf("\tKey Src      : %x\n", nla_get_u8(tb_pan_desc[NL802154_ATTR_PAN_DESC_KEY_SRC]));
+		}
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_KEY_INDEX]) {
+		    printf("\tKey Index    : %d\n", nla_get_u8(tb_pan_desc[NL802154_ATTR_PAN_DESC_KEY_INDEX]));
+		}
+	}
+
+	if (tb_msg[NL802154_ATTR_PEND_ADDR_SPEC]) {
+		printf("Pend addr spec: %x\n", nla_get_u8(tb_msg[NL802154_ATTR_PEND_ADDR_SPEC]));
+	}
+
+	if (tb_msg[NL802154_ATTR_SDU_LENGTH]) {
+		sdu_len = nla_get_u8(tb_msg[NL802154_ATTR_SDU_LENGTH]);
+		if( sdu_len > BEACON_SDU_LEN_MAX ) {
+			sdu_len = BEACON_SDU_LEN_MAX;
+		}
+		len = sdu_len;
+		printf("SDU Len: %d\n", sdu_len);
+	}
+	else {
+		len = 0;
+	}
+
+	r = parse_nla_array_u8( tb_msg[ NL802154_ATTR_SDU ], NL802154_ATTR_SDU_ENTRY, sdu, &len );
+	if ( 0 != r ) {
+	    goto protocol_error;
+	}
+
+	printf("SDU: ", sdu_len);
+	for (i = 0; i < sdu_len; i++) {
+	    printf("%x ", sdu[i]);
+	}
+	printf("\n", sdu[i]);
+
+	goto out;
+
+protocol_error:
+	fprintf( stderr, "protocol error\n" );
+	r = -EINVAL;
+out:
+	return NL_SKIP;
+}
+
+static int handle_beacon_notify(struct nl802154_state *state,
+				 struct nl_cb *cb,
+				 struct nl_msg *msg,
+				 int argc, char **argv,
+				 enum id_input id)
+{
+	int r;
+	int timeout_ms;
+
+	if ( NULL == argv[0]) {
+        r = -EINVAL;
+        goto out;
+	}
+	timeout_ms = atoi(argv[0]);
+	if (timeout_ms < 0) {
+        r = -EINVAL;
+        goto out;
+	}
+	NLA_PUT_U16(msg, NL802154_ATTR_BEACON_INDICATION_TIMEOUT, (uint16_t) timeout_ms);
+	r = nl_cb_set(cb, NL_CB_VALID, NL_CB_CUSTOM, print_nl802154_beacon_notify_ind, NULL);
+    goto out;
+
+nla_put_failure:
+    r = -ENOBUFS;
+out:
+    return r;
+}
+COMMAND(get, beacon_notify, "<ms>",
+    NL802154_CMD_GET_BEACON_NOTIFY, 0, CIB_PHY, handle_beacon_notify, NULL);
