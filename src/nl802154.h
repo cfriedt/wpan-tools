@@ -314,4 +314,10 @@ enum nl802154_supported_bool_states {
 	NL802154_SUPPORTED_BOOL_MAX = __NL802154_SUPPORTED_BOOL_AFTER_LAST - 1
 };
 
+//Bringing in the scan type defines from ieee802154_netdev.h in the kernel.
+#define IEEE802154_MAC_SCAN_ED		0
+#define IEEE802154_MAC_SCAN_ACTIVE	1
+#define IEEE802154_MAC_SCAN_PASSIVE	2
+#define IEEE802154_MAC_SCAN_ORPHAN	3
+
 #endif /* __NL802154_H */

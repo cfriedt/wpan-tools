@@ -338,3 +338,179 @@ invalid_arg:
 
 COMMAND(get, ed_scan, "[<page> [<channels> [<duration>]]]",
     NL802154_CMD_ED_SCAN_REQ, 0, CIB_PHY, handle_ed_scan, NULL);
+
+static int print_active_scan_results( struct nl_msg *msg, void *arg)
+{
+	struct genlmsghdr *gnlh;
+	struct nlattr *tb_msg[NL802154_ATTR_MAX + 1];
+	unsigned int *wpan_phy = arg;
+	int r;
+
+	gnlh = nlmsg_data( nlmsg_hdr( msg ) );
+	if ( NULL ==  gnlh ) {
+	    fprintf( stderr, "gnlh was null\n" );
+	    goto protocol_error;
+	}
+
+	r = nla_parse( tb_msg, NL802154_ATTR_MAX, genlmsg_attrdata( gnlh, 0 ),
+	      genlmsg_attrlen( gnlh, 0 ), NULL );
+	if ( 0 != r ) {
+	    fprintf( stderr, "nla_parse\n" );
+	    goto protocol_error;
+	}
+
+	printf("Active Scan print results: \n");
+	//Check if the message is a beacon or the last status message
+	if (tb_msg[NL802154_ATTR_PAN_DESCRIPTOR]) {
+		struct nlattr *tb_pan_desc[NL802154_ATTR_MAX + 1];
+
+		static struct nla_policy pan_desc_policy[NL802154_ATTR_MAX + 1] = {
+			[NL802154_ATTR_PAN_DESC_SRC_ADDR_MODE] = { .type = NLA_U8 },
+			[NL802154_ATTR_PAN_DESC_SRC_PAN_ID] = { .type = NLA_U16 },
+			[NL802154_ATTR_PAN_DESC_SRC_ADDR] = { .type = NLA_U32 },
+			[NL802154_ATTR_PAN_DESC_CHANNEL_NUM] = { .type = NLA_U8 },
+			[NL802154_ATTR_PAN_DESC_CHANNEL_PAGE] = { .type = NLA_U8 },
+			[NL802154_ATTR_PAN_DESC_SUPERFRAME_SPEC] = { .type = NLA_U8 },
+			[NL802154_ATTR_PAN_DESC_GTS_PERMIT] = { .type = NLA_U32 },
+			[NL802154_ATTR_PAN_DESC_LQI] = { .type = NLA_U8 },
+			[NL802154_ATTR_PAN_DESC_TIME_STAMP] = { .type = NLA_U32 },
+			[NL802154_ATTR_PAN_DESC_SEC_STATUS] = { .type = NLA_U8 },
+			[NL802154_ATTR_PAN_DESC_SEC_LEVEL] = { .type = NLA_U8 },
+			[NL802154_ATTR_PAN_DESC_KEY_ID_MODE] = { .type = NLA_U8 },
+			[NL802154_ATTR_PAN_DESC_KEY_SRC] = { .type = NLA_U8 },
+			[NL802154_ATTR_PAN_DESC_KEY_INDEX] = { .type = NLA_U8 },
+		};
+
+		printf("pan_descriptor:\n");
+
+		r = nla_parse_nested(tb_pan_desc, NL802154_ATTR_MAX,
+				       tb_msg[NL802154_ATTR_PAN_DESCRIPTOR],
+				       pan_desc_policy);
+		if ( 0 != r ) {
+		    fprintf( stderr, "nla_parse_nested\n" );
+		    goto protocol_error;
+		}
+
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_SRC_ADDR_MODE]) {
+		    printf("\tsrc_addr_mode: %d\n", nla_get_u8(tb_pan_desc[NL802154_ATTR_PAN_DESC_SRC_ADDR_MODE]));
+		}
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_SRC_PAN_ID]) {
+		    printf("\tsrc_pan_id: %x\n", nla_get_u16(tb_pan_desc[NL802154_ATTR_PAN_DESC_SRC_PAN_ID]));
+		}
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_SRC_ADDR]) {
+		    printf("\tsrc_addr: %d\n", nla_get_u32(tb_pan_desc[NL802154_ATTR_PAN_DESC_SRC_ADDR]));
+		}
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_CHANNEL_NUM]) {
+		    printf("\tchannel_num: %d\n", nla_get_u8(tb_pan_desc[NL802154_ATTR_PAN_DESC_CHANNEL_NUM]));
+		}
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_CHANNEL_PAGE]) {
+		    printf("\tchannel_page: %d\n", nla_get_u8(tb_pan_desc[NL802154_ATTR_PAN_DESC_CHANNEL_PAGE]));
+		}
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_SUPERFRAME_SPEC]) {
+		    printf("\tsuper_frame_spec: %x\n", nla_get_u8(tb_pan_desc[NL802154_ATTR_PAN_DESC_SUPERFRAME_SPEC]));
+		}
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_GTS_PERMIT]) {
+			char *gts = nla_get_u32(tb_pan_desc[NL802154_ATTR_PAN_DESC_GTS_PERMIT]) ? "TRUE" : "FALSE";
+		    printf("\tgts_permit: %s\n", gts);
+		}
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_LQI]) {
+		    printf("\tlqi: %x\n", nla_get_u8(tb_pan_desc[NL802154_ATTR_PAN_DESC_LQI]));
+		}
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_TIME_STAMP]) {
+		    printf("\ttimestamp: %x\n", nla_get_u32(tb_pan_desc[NL802154_ATTR_PAN_DESC_TIME_STAMP]));
+		}
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_SEC_STATUS]) {
+		    printf("\tsec_status: %x\n", nla_get_u8(tb_pan_desc[NL802154_ATTR_PAN_DESC_SEC_STATUS]));
+		}
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_SEC_LEVEL]) {
+		    printf("\tsec_level: %x\n", nla_get_u8(tb_pan_desc[NL802154_ATTR_PAN_DESC_SEC_LEVEL]));
+		}
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_KEY_ID_MODE]) {
+		    printf("\tkey_id_mode: %x\n", nla_get_u8(tb_pan_desc[NL802154_ATTR_PAN_DESC_KEY_ID_MODE]));
+		}
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_KEY_SRC]) {
+		    printf("\tkey_src: %x\n", nla_get_u8(tb_pan_desc[NL802154_ATTR_PAN_DESC_KEY_SRC]));
+		}
+		if (tb_pan_desc[NL802154_ATTR_PAN_DESC_KEY_INDEX]) {
+		    printf("\tkey_index: %d\n", nla_get_u8(tb_pan_desc[NL802154_ATTR_PAN_DESC_KEY_INDEX]));
+		}
+		goto out;
+
+	} else if( tb_msg[NL802154_ATTR_SCAN_STATUS]){
+		printf( "active_scan_confirm \n");
+		printf( "\tscan_status: %d\n",nla_get_u8( tb_msg[NL802154_ATTR_SCAN_STATUS] ) );
+		printf( "\tscan_type: %d\n",nla_get_u8( tb_msg[NL802154_ATTR_SCAN_TYPE] ) );
+		printf( "\tattribute_page: %d\n",nla_get_u8( tb_msg[NL802154_ATTR_PAGE] ) );
+		printf( "\tscan_detect_category: %d\n",nla_get_u8( tb_msg[NL802154_ATTR_SCAN_DETECTED_CATEGORY] ) );
+		printf( "\tscan_result_list_size: %d\n",nla_get_u8( tb_msg[NL802154_ATTR_SCAN_RESULT_LIST_SIZE] ) );
+		goto out;
+	} else {
+		goto protocol_error;
+	}
+
+protocol_error:
+	fprintf( stderr, "protocol error\n" );
+	r = -EINVAL;
+out:
+	return NL_SKIP;
+}
+
+static int handle_active_scan(struct nl802154_state *state,
+               struct nl_cb *cb,
+               struct nl_msg *msg,
+               int argc, char **argv,
+               enum id_input id)
+{
+	int r;
+	int i;
+
+	const uint8_t scan_type = IEEE802154_MAC_SCAN_ACTIVE;
+	uint32_t channel_page = 0;
+	static uint32_t scan_channels;
+	uint32_t scan_duration;
+
+	if ( argc >= 1 ) {
+		if ( 1 != sscanf( argv[ 0 ], "%u", &channel_page ) ) {
+			goto invalid_arg;
+		}
+	}
+	if ( argc >= 2 ) {
+		if ( ! (
+				( 0 == strncmp( "0x", argv[ 1], 2 ) && 1 == sscanf( argv[ 1 ] + 2, "%x", &scan_channels ) ) ||
+				1 == sscanf( argv[ 1 ], "%u", &scan_channels )
+		) ) {
+			goto invalid_arg;
+		}
+	}
+	if ( argc == 3 ) {
+		if ( 1 != sscanf( argv[ 2 ], "%u", &scan_duration ) ) {
+			goto invalid_arg;
+		}
+	}
+	if ( argc > 3 ) {
+		goto invalid_arg;
+	}
+
+	NLA_PUT_U8(msg, NL802154_ATTR_SCAN_TYPE, scan_type);
+	NLA_PUT_U32(msg, NL802154_ATTR_SUPPORTED_CHANNEL, scan_channels );
+	NLA_PUT_U8(msg, NL802154_ATTR_SCAN_DURATION, scan_duration);
+	NLA_PUT_U8(msg, NL802154_ATTR_PAGE, channel_page);
+
+	r = nl_cb_set(cb, NL_CB_VALID, NL_CB_CUSTOM, print_active_scan_results, &scan_channels );
+	if ( 0 != r ) {
+		goto out;
+	}
+
+	r = 0;
+	goto out;
+
+	nla_put_failure:
+	r = -ENOBUFS;
+	out:
+	return r;
+	invalid_arg:
+	r = 1;
+	goto out;
+}
+COMMAND(get, active_scan, "<channel_page> <scan channel bitmask> <scan duration>",
+		NL802154_CMD_ACTIVE_SCAN_REQ, 0, CIB_NETDEV, handle_active_scan, NULL);
