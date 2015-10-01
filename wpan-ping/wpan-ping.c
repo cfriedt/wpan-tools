@@ -69,7 +69,7 @@ struct sockaddr_ieee802154 {
 	struct ieee802154_addr_sa addr;
 };
 
-#ifdef HAVE_GETOPT_LONG
+#ifdef _GNU_SOURCE
 static const struct option perf_long_opts[] = {
 	{ "daemon", no_argument, NULL, 'd' },
 	{ "address", required_argument, NULL, 'a' },
@@ -107,7 +107,7 @@ void usage(const char *name) {
 	"--size | -s packet length\n"
 	"--interface | -i listen on this interface (default wpan0)\n"
 	"--version | -v print out version\n"
-	"--help This usage text\n", name);
+	"--help | -h this usage text\n", name);
 }
 
 static int nl802154_init(struct config *conf)
@@ -385,6 +385,9 @@ static int parse_dst_addr(struct config *conf, char *arg)
 {
 	int i;
 
+	if (!arg)
+		return -1;
+
 	/* PAN ID is filled from netlink in get_interface_info */
 	conf->dst.family = AF_IEEE802154;
 
@@ -422,7 +425,7 @@ static int parse_dst_addr(struct config *conf, char *arg)
 int main(int argc, char *argv[]) {
 	int c, ret;
 	struct config *conf;
-	char *dst_addr;
+	char *dst_addr = NULL;
 
 	conf = malloc(sizeof(struct config));
 
@@ -441,11 +444,11 @@ int main(int argc, char *argv[]) {
 	}
 
 	while (1) {
-#ifdef HAVE_GETOPT_LONG
+#ifdef _GNU_SOURCE
 		int opt_idx = -1;
-		c = getopt_long(argc, argv, "b:a:ec:s:i:dvh", perf_long_opts, &opt_idx);
+		c = getopt_long(argc, argv, "a:ec:s:i:dvh", perf_long_opts, &opt_idx);
 #else
-		c = getopt(argc, argv, "b:a:ec:s:i:dvh");
+		c = getopt(argc, argv, "a:ec:s:i:dvh");
 #endif
 		if (c == -1)
 			break;
@@ -474,7 +477,7 @@ int main(int argc, char *argv[]) {
 			conf->interface = optarg;
 			break;
 		case 'v':
-			fprintf(stdout, "wpan-ping 0.1\n");
+			fprintf(stdout, "wpan-ping " PACKAGE_VERSION "\n");
 			return 1;
 		case 'h':
 			usage(argv[0]);
